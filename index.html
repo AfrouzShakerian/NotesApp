@@ -19,7 +19,7 @@
         </form>
         <ul id="notesnote">
             <li v-for="note in notes" :key="note.id">
-                <h2>{{ note.title }}</h2> 
+                <h2>{{ note.title }}</h2>
                 <p>{{ note.content }}</p>
                 <button @click="removeNote(note)">X</button>
             </li>

@@ -9,9 +9,14 @@ createApp({
         };
     },
     methods: {
-        addNote() {
+        async fetchNotes() {
+            const response = await fetch('/api/notes');
+            const data = await response.json();
+            this.notes = data;
+        },
+
+        async addNote() {
             const newNote = {
-                id: Date.now(),
                 title: this.title.trim(),
                 content: this.content.trim()
             };
@@ -19,31 +24,29 @@ createApp({
                 alert("Both title and content are required!");
                 return;
             }
-            this.notes.push(newNote);
-            this.saveNotesToStorage();
+
+            const response = await fetch('/api/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newNote)
+            });
+            const addedNote = await response.json();
+            this.notes.push(addedNote);
 
             this.title = '';
             this.content = '';
         },
 
-        removeNote(noteToRemove) {
+        async removeNote(noteToRemove) {
+            await fetch(`/api/notes/${noteToRemove.id}`, {
+                method: 'DELETE'
+            });
             this.notes = this.notes.filter(note => note.id !== noteToRemove.id);
-            this.saveNotesToStorage();
-        },
-
-        saveNotesToStorage() {
-            localStorage.setItem('notes', JSON.stringify(this.notes));
-        },
-
-        loadNotesFromStorage() {
-            const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-            this.notes = savedNotes;
         }
     },
 
     mounted() {
-        // Automatically load notes when the component is mounted
-        this.loadNotesFromStorage();
+        this.fetchNotes();
     }
 
 }).mount('#app');
